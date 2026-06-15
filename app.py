@@ -1,13 +1,3 @@
-"""
-app.py  (v2 — Delhi Edition)
-------------------------------
-WasteWise: Smart Bin Prediction & Route Optimization
-Delhi Smart City Implementation
-
-Run with:
-    streamlit run app.py
-"""
-
 import streamlit as st
 import pandas as pd
 
@@ -15,16 +5,13 @@ from data_generator  import generate_bin_data
 from model           import train_model, predict_overflow
 from route_optimizer import optimize_route, DEPOT_NAME
 from visualization   import draw_route_map
+from streamlit_folium import st_folium
 
-
-# ── Page config ────────────────────────────────────────────────────────────────
 st.set_page_config(
-    page_title = "WasteWise Delhi 🗑️",
-    page_icon  = "🗑️",
+    page_title = "WasteWise Delhi",
     layout     = "wide",
 )
 
-# ── Header ─────────────────────────────────────────────────────────────────────
 st.title("🗑️ WasteWise — Delhi Smart Bin Prediction & Route Optimization")
 st.markdown(
     """
@@ -39,14 +26,12 @@ st.markdown(
 st.divider()
 
 
-# ── Session state ──────────────────────────────────────────────────────────────
 for key in ["df", "model", "accuracy", "results_df",
             "active_df", "route", "total_km"]:
     if key not in st.session_state:
         st.session_state[key] = None
 
 
-# ── Sidebar ────────────────────────────────────────────────────────────────────
 with st.sidebar:
     st.header("⚙️ Configuration")
 
@@ -80,9 +65,9 @@ with st.sidebar:
     st.info("Run steps in order.")
 
 
-# ══════════════════════════════════════════════════════════════════════════════
+# ---------------------------
 #  STEP 1 — GENERATE DATA
-# ══════════════════════════════════════════════════════════════════════════════
+ # ---------------------------
 st.subheader("📊 Step 1: Generate Delhi Bin Dataset")
 st.write(
     "Creates a realistic dataset of waste bins spread across 15 Delhi localities. "
@@ -112,7 +97,6 @@ if st.session_state["df"] is not None:
         m4.metric("Market Bins",        int((df["area_type"] == "market").sum()))
         m5.metric("Residential Bins",   int((df["area_type"] == "residential").sum()))
 
-    # Colour fill_level column using pandas Styler (no background_gradient = no matplotlib)
     def colour_fill(val):
         """Green for low fill, red for high fill — pure CSS, no matplotlib."""
         if val >= 80:
@@ -125,15 +109,15 @@ if st.session_state["df"] is not None:
     display_cols = ["bin_id", "location_name", "latitude", "longitude",
                     "fill_level", "area_type", "past_overflow_count", "overflow"]
 
-    styled = df[display_cols].style.applymap(colour_fill, subset=["fill_level"])
+    styled = df[display_cols].style.map(colour_fill, subset=["fill_level"])
     st.dataframe(styled, use_container_width=True, height=320)
 
 st.divider()
 
 
-# ══════════════════════════════════════════════════════════════════════════════
+# ---------------------------
 #  STEP 2 — TRAIN MODEL
-# ══════════════════════════════════════════════════════════════════════════════
+# ---------------------------
 st.subheader("🤖 Step 2: Train ML Model")
 st.write(
     "Trains a **Decision Tree Classifier** using fill level, GPS coordinates, "
@@ -177,9 +161,9 @@ with col2:
 st.divider()
 
 
-# ══════════════════════════════════════════════════════════════════════════════
+# ---------------------------
 #  STEP 3 — PREDICT OVERFLOW
-# ══════════════════════════════════════════════════════════════════════════════
+# ---------------------------
 st.subheader("🔮 Step 3: Predict Overflow Probability")
 st.write(
     "Runs the trained model on every Delhi bin and scores each with an "
@@ -232,9 +216,10 @@ if st.session_state["results_df"] is not None:
 st.divider()
 
 
-# ══════════════════════════════════════════════════════════════════════════════
+# ---------------------------
 #  STEP 4 — OPTIMIZE ROUTE
-# ══════════════════════════════════════════════════════════════════════════════
+# ---------------------------
+
 st.subheader("🗺️ Step 4: Optimize Collection Route (Delhi)")
 st.write(
     f"Plans the garbage truck route starting from **{DEPOT_NAME}**. "
@@ -275,14 +260,22 @@ if st.session_state["route"] is not None:
         m3.metric("🏁 Start Point",    "India Gate")
         m4.metric("⚡ Algorithm",      "Greedy NN")
 
-    # ── Delhi Map ──────────────────────────────────────────────────────────
+#map
     st.markdown("#### 🗺️ Delhi Bin Route Map")
-    img_rgb = draw_route_map(results_df, active_df, route)
-    st.image(img_rgb,
-             caption="Delhi Smart Bin Map — Red = Active Bins | Cyan = Route | Green = India Gate Depot",
-             use_container_width=True)
 
-    # ── Route table ────────────────────────────────────────────────────────
+    folium_map = draw_route_map(
+        results_df,
+        active_df,
+        route
+    )
+
+    st_folium(
+        folium_map,
+        width=1200,
+        height=600
+    )
+
+# Route 
     st.markdown("#### 📋 Route Sequence")
 
     if route:
@@ -300,7 +293,7 @@ if st.session_state["route"] is not None:
     else:
         st.info("No active bins at this threshold — try lowering it in the sidebar.")
 
-    # ── Active bins detail ─────────────────────────────────────────────────
+    #  Active bins detail 
     if not active_df.empty:
         with st.expander("📦 Active Bins Detail — All Flagged Delhi Bins"):
             disp = active_df[[
@@ -321,11 +314,11 @@ if st.session_state["route"] is not None:
 
 st.divider()
 
-# ── Footer ─────────────────────────────────────────────────────────────────────
+# Footer 
 st.markdown("""
 <div style='text-align:center; color:#666; font-size:0.82em; padding:8px 0'>
-    WasteWise v2 — Delhi Smart City Edition &nbsp;|&nbsp;
-    Python · Scikit-Learn · OpenCV · Streamlit &nbsp;|&nbsp;
-    15 Delhi localities · Real GPS coordinates · Haversine routing
+    WasteWise v2 — Delhi &nbsp;|&nbsp;
+    Python · Scikit-Learn · Folium · Streamlit &nbsp;|&nbsp;
+    15 Delhi localities
 </div>
 """, unsafe_allow_html=True)
