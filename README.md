@@ -1,4 +1,5 @@
-# 🗑️ WasteWise: Smart Bin Prediction & Route Optimization
+# WasteWise: 
+Smart Bin Prediction & Route Optimization
 
 > A Machine Learning project that predicts which waste bins are about to overflow
 > and plans the most efficient garbage collection route — no IoT hardware needed!
@@ -45,7 +46,7 @@ WasteWise/
 
 ## 🚀 How to Run
 
-### 1. Clone or Download the Project
+### 1. Download the Project
 ```bash
 git clone https://github.com/YOUR_USERNAME/WasteWise.git
 cd WasteWise
@@ -109,27 +110,4 @@ This is how many real-world route planners work in practice!
 - **Active bins**: ~20–35% of total bins flagged (varies by threshold)
 - **Route**: automatically ordered to minimize travel distance
 
----
 
-## 🎓 Learning Outcomes
-
-By studying this project, you'll understand:
-- Synthetic dataset creation with NumPy
-- Binary classification with Decision Tree
-- `train_test_split`, `predict_proba`, `accuracy_score`
-- Greedy algorithms for route optimization
-- OpenCV for non-camera image drawing
-- Streamlit session state and interactive UI
-
----
-
-## 👤 Author
-
-Built as a BTech final-year project demonstrating applied Machine Learning
-for smart city infrastructure.
-
----
-
-## 📄 License
-
-MIT License — free to use, modify, and share.
